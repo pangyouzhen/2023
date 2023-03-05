@@ -1,3 +1,4 @@
+setuptools==56.0.0
 akshare==0.9.72
 beautifulsoup4==4.9.3
 black==22.12.0
