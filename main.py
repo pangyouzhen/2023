@@ -11,7 +11,7 @@ import openpyxl
 
 from stock.cls.stock_cls_alerts import stock_zh_a_alerts_cls
 from stock.cls.stock_cls_zt_analyse import stock_zh_a_zt_analyse_cls
-from stock.utils.wraps_utils import func_utils, now
+from stock.utils.wraps_utils import func_utils
 
 print('start------')
 path = Path("./log")
@@ -19,22 +19,12 @@ logger.info(f"{path.absolute()}")
 global trade_df
 trade_df = pd.read_csv("./stock/tool_trade_date_hist_sina_df.csv")
 
-# 今天的quick info数据
-# 已经失效
-@func_utils(
-    csv_path="./raw_data/", csv_name="quick", table_name="quick_info", df=trade_df
-)
-def alerts_cls():
-    stock_zh_a_alerts_cls_df = stock_zh_a_alerts_cls()
-    print(stock_zh_a_alerts_cls_df[:5])
-    return stock_zh_a_alerts_cls_df
-
 
 # 今天的原始数据
 @func_utils(
     csv_path="./raw_data/", csv_name="raw_data", table_name="everyday_data", df=trade_df
 )
-def get_raw_date():
+def get_raw_date(date,*args,**kwargs):
     stock_zh_a_spot_df = ak.stock_zh_a_spot()
     print(stock_zh_a_spot_df[:5])
     return stock_zh_a_spot_df
@@ -42,14 +32,14 @@ def get_raw_date():
 
 # 今天的cls zt分析数据
 @logger.catch
-def zt_analyse_df(date):
+def zt_analyse_df(date,*args,**kwargs):
     date = date.replace("-","")
     return stock_zh_a_zt_analyse_cls(date)
 
 
 # zt 数据
 @func_utils(csv_path="./raw_data/", csv_name="zt", table_name="zt", df=trade_df)
-def get_zt_data(date):
+def get_zt_data(date,*args,**kwargs):
     date = date.replace("-", "")
     stock_em_zt_pool_df = ak.stock_em_zt_pool(date)
     return stock_em_zt_pool_df
@@ -57,7 +47,7 @@ def get_zt_data(date):
 
 # zb数据
 @func_utils(csv_path="./raw_data/", csv_name="zb", table_name="zb", df=trade_df)
-def get_zb_data(date):
+def get_zb_data(date,*args,**kwargs):
     date = date.replace("-", "")
     stock_em_zt_pool_zbgc_df = ak.stock_em_zt_pool_zbgc(date)
     return stock_em_zt_pool_zbgc_df
@@ -65,23 +55,23 @@ def get_zb_data(date):
 
 # dt数据
 @func_utils(csv_path="./raw_data", csv_name="dt", table_name="dt", df=trade_df)
-def get_dt_data(date):
+def get_dt_data(date,*args,**kwargs):
     date = date.replace("-", "")
     stock_em_zt_pool_dtgc_df = ak.stock_em_zt_pool_dtgc(date)
     return stock_em_zt_pool_dtgc_df
 
 
 @logger.catch
-def merge_data(**kwargs):
+def merge_data(date,*args,**kwargs):
     df = pd.read_excel("sentiment/stock2023.xlsx")
-    raw_data = pd.read_csv(f"raw_data/raw_data_{now}.csv")
-    zt_data = pd.read_csv(f"raw_data/zt_{now}.csv")
-    dt_data_path = Path(f"raw_data/dt_{now}.csv")
+    raw_data = pd.read_csv(f"raw_data/raw_data_{date}.csv")
+    zt_data = pd.read_csv(f"raw_data/zt_{date}.csv")
+    dt_data_path = Path(f"raw_data/dt_{date}.csv")
     if dt_data_path.exists():
-        dt_data = pd.read_csv(f"raw_data/dt_{now}.csv")
+        dt_data = pd.read_csv(f"raw_data/dt_{date}.csv")
     else:
         dt_data = pd.DataFrame()
-    zb_data = pd.read_csv(f"raw_data/zb_{now}.csv")
+    zb_data = pd.read_csv(f"raw_data/zb_{date}.csv")
     increase = raw_data[raw_data["涨跌幅"] > 0]
     decrease = raw_data[raw_data["涨跌幅"] < 0]
     zt_num = zt_data.shape[0]
@@ -95,7 +85,7 @@ def merge_data(**kwargs):
     one = zt_data[zt_data["连板数"] == 1]
     today_df = pd.DataFrame(
         [{
-            "日期":now,
+            "日期":date,
             "红盘": increase.shape[0],
             "绿盘": decrease.shape[0],
             "涨停": zt_num,
@@ -111,28 +101,27 @@ def merge_data(**kwargs):
         }]
     )
     df = df.append(today_df)
-    df.to_excel("sentiment/stock2023.xlsx",index=False)
+    df.to_csv("sentiment/stock2023.csv",index=False)
 
 
-def main(**kwargs):
-    print(kwargs)
-    if kwargs['date'] in trade_df["trade_date"].tolist():
+def main(date,*args,**kwargs):
+    if date in trade_df["trade_date"].tolist():
         # alerts_cls()
-        get_raw_date()
+        get_raw_date(date)
         time.sleep(5)
 
-        get_zt_data(kwargs['date'])
+        get_zt_data(date)
         time.sleep(20)
 
-        get_dt_data(kwargs['date'])
+        get_dt_data(date)
         time.sleep(20)
 
-        get_zb_data(kwargs['date'])
+        get_zb_data(date)
         time.sleep(20)
 
-        zt_analyse_df(kwargs['date'])
+        zt_analyse_df(date)
 
-        merge_data()
+        merge_data(date)
     else:
         logger.info("今天不是交易日")
 
@@ -152,7 +141,7 @@ FUNCTION_MAP = {
 def parse_para() -> Namespace:
     parser = argparse.ArgumentParser(description="获取市场情绪")
     parser.add_argument("--func", choices=FUNCTION_MAP.keys(), help="获取涨停数据")
-    parser.add_argument("--date", default=now)
+    parser.add_argument("--date", default=datetime.datetime.today().date())
     args = parser.parse_args()
     print(args)
     func = FUNCTION_MAP[args.func]
