@@ -1,13 +1,14 @@
 import argparse
+import datetime
+import sys
 import time
 from argparse import Namespace
 from pathlib import Path
-import datetime
 
 import akshare as ak
+import openpyxl
 import pandas as pd
 from loguru import logger
-import openpyxl
 
 from stock.cls.stock_cls_alerts import stock_zh_a_alerts_cls
 from stock.cls.stock_cls_zt_analyse import stock_zh_a_zt_analyse_cls
@@ -146,5 +147,6 @@ def parse_para() -> Namespace:
     print(args)
     func = FUNCTION_MAP[args.func]
     func(date = args.date)
-    
-parse_para()
+
+if __name__ == "__main__":
+    sys.exit(parse_para())
