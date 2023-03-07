@@ -142,7 +142,7 @@ FUNCTION_MAP = {
 def parse_para() -> Namespace:
     parser = argparse.ArgumentParser(description="获取市场情绪")
     parser.add_argument("--func", choices=FUNCTION_MAP.keys(), help="获取涨停数据")
-    parser.add_argument("--date", default=datetime.datetime.today().date())
+    parser.add_argument("--date", default=str(datetime.datetime.today().date()))
     args = parser.parse_args()
     print(args)
     func = FUNCTION_MAP[args.func]
