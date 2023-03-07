@@ -32,7 +32,7 @@ jobs:
       - name: git
         run: |
           git config --global user.email "pangyouzhen@live.com"
-          git config --global user.name "pyz"
+          git config --global user.name "pangyouzhen"
           git add .
           git commit -m "${{ steps.date.outputs.current_date }} update"
           git push
