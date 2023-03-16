@@ -6,7 +6,6 @@ from argparse import Namespace
 from pathlib import Path
 
 import akshare as ak
-import openpyxl
 import pandas as pd
 from loguru import logger
 
