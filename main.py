@@ -101,6 +101,8 @@ def merge_data(date,*args,**kwargs):
         }]
     )
     df = df.append(today_df)
+    df["日期"] = pd.to_datetime(df["日期"])
+    df = df.sort_values("日期")
     df.to_csv("sentiment/stock2023.csv",index=False)
 
 

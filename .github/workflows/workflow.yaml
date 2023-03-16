@@ -1,8 +1,8 @@
 name: 2023
 on: [push]
-  # schedule:
-  #   - cron: '0 14 * * MON'
-  #   8 个小时时差
+  schedule:
+    - cron: '0 18 * * *'
+    # 8 个小时时差
 
 jobs:
   build:
