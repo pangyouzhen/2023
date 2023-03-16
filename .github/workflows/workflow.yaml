@@ -1,5 +1,5 @@
 name: 2023
-on: [push]
+on:
   schedule:
     - cron: '0 10 * * *'
     # 8 个小时时差
