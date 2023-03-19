@@ -63,7 +63,7 @@ def get_dt_data(date,*args,**kwargs):
 
 @logger.catch
 def merge_data(date,*args,**kwargs):
-    df = pd.read_excel("sentiment/stock2023.xlsx")
+    df = pd.read_csv("sentiment/stock2023.csv")
     raw_data = pd.read_csv(f"raw_data/raw_data_{date}.csv")
     zt_data = pd.read_csv(f"raw_data/zt_{date}.csv")
     dt_data_path = Path(f"raw_data/dt_{date}.csv")
